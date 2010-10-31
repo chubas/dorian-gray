@@ -66,3 +66,22 @@ Sites that doesn't even display dates:
 
 - foursquare
 
+=============================================================================================0
+
+* data-time 1288127554000
+4:12 PM Oct 26th
+Tuesday, October 26, 2010 at 3:57pm
+* data-date Tue, 26 Oct 2010 13:57:42 -0700
+* title 2010-10-26 13:16:43
+* title 2010-10-26 21:23:17Z
+Rails: Sat Oct 30 13:39:53 -0500 2010
+
+HTML 5:
+http://www.w3schools.com/html5/tag_time.asp
+http://www.whatwg.org/specs/web-apps/current-work/multipage/common-microsyntaxes.html
+
+<time datetime="2008-14-14">Some time</time>
+
+Date.parse()
+
+https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Date/parse
