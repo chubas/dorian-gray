@@ -19,6 +19,7 @@ var years = function(y) {
 };
 
 // Following the tests at http://github.com/rails/rails/blob/master/actionpack/test/template/date_helper_test.rb
+// NOTE: Rails takes into account daylight saving times. Dorian doesn't [yet], so tests are slightly modified.
 
 describe("Dorian", function() {
     describe("distanceOfTimeInWords", function() {

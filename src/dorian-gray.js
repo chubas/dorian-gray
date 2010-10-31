@@ -1,6 +1,34 @@
-function Dorian() {
+function Dorian(options) {
+    var _options = options || {};
+    var observable = _options.elements || [];
+    var interval = _options.interval;
+    var getTime = _options.getTime || function(element) { return element.innerHTML; };
+    var formatTime = _options.formatTime || function(relative) { return relative; };
+
+    if(typeof(observable) === 'undefined') {
+        this._observed = [];
+    }
+    if(typeof(interval) !== 'number' || isNaN(interval)) {
+        throw "Invalid argument. interval should be a number";
+    } else {
+        if(interval === 0) {
+            throw "Invalid argument. interval should be greater than 0";
+        }
+    }
+    this._observerTimerID = null;
+    this.observe = function() {
+        for(var i = 0; i < observable.length; i++) {
+            var element = observable[i];
+            element.innerHTML = formatTime("5 minutes");
+            console.log(element);
+        };
+    };
 }
-Dorian.observerPid = null;
+Dorian.observe = function(options) {
+    var dorian = new Dorian(options);
+    dorian.observe();
+    return dorian;
+};
 Dorian.distanceOfTimeInWords = function(secondsEllapsed, includeSeconds, options) {
     var _secondsEllapsed = secondsEllapsed;
     var _includeSeconds = includeSeconds;
