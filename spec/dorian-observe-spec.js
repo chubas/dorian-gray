@@ -31,14 +31,38 @@ describe("Dorian", function() {
                 document.body.removeChild(tag);
             });
 
-            it("should execute the callback function inmediately after calling the observe method", function() {
+            it("executes the callback function inmediately after calling the observe method", function() {
                 var dorian = Dorian.observe({
                     elements : document.getElementsByClassName("time-relative"),
                     interval : 100000,
-                    getTime  : function(element) { return element.getAttribute("title") },
-                    formatTime  : function(relativeTime) { return relativeTime + " ago" }
+                    formatTime : function(relativeTime) { return relativeTime + " ago" }
                 });
                 expect(tag.innerHTML.match(/ago/)).toBeTruthy();
+            });
+
+            it("executes the callback on the intervals specified", function() {
+                DeLorean.globalApi(true);
+                var counter = 0;
+                var dorian = Dorian.observe({
+                    elements : document.getElementsByClassName("time-relative"),
+                    interval : 60000,
+                    formatTime : function(relativeTime) { counter++; return relativeTime; }
+                });
+                DeLorean.advance(60000 * 10);
+                expect(counter).toBe(11); // 10 plus the initial
+                DeLorean.reset();
+
+                counter = 0;
+                dorian = Dorian.observe({
+                    elements : document.getElementsByClassName("time-relative"),
+                    interval : 60000,
+                    formatTime : function(relativeTime) { counter++; return relativeTime; }
+                });
+                DeLorean.advance(60000 * 10 - 1);
+                expect(counter).toBe(10); // 1 millisecond before the 10th callback
+
+                DeLorean.reset();
+                DeLorean.globalApi(false);
             });
 
         });

@@ -17,11 +17,14 @@ function Dorian(options) {
     }
     this._observerTimerID = null;
     this.observe = function() {
-        for(var i = 0; i < observable.length; i++) {
-            var element = observable[i];
-            element.innerHTML = formatTime("5 minutes");
-            console.log(element);
+        var replace = function() {
+            for(var i = 0; i < observable.length; i++) {
+                var element = observable[i];
+                element.innerHTML = formatTime(new Date());
+            };
         };
+        replace();
+        setInterval(replace, interval);
     };
 }
 Dorian.observe = function(options) {
