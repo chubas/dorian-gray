@@ -1,6 +1,6 @@
 function Dorian(options) {
     var _options = options || {};
-    var observable = _options.elements || [];
+    var observable = _options.observable || [];
     var interval = _options.interval;
     var getTime = _options.getTime || function(element) { return element.innerHTML; };
     var formatTime = _options.formatTime || function(relative) { return relative; };
@@ -18,8 +18,17 @@ function Dorian(options) {
     this._observerTimerID = null;
     this.observe = function() {
         var replace = function() {
-            for(var i = 0; i < observable.length; i++) {
-                var element = observable[i];
+            var elements;
+            if(typeof(observable) === 'function') {
+                elements = observable();
+            } else if(typeof(observable) === 'string') {
+                elements = document.getElementsByClassName(observable);
+            } else {
+                elements = observable;
+            }
+
+            for(var i = 0; i < elements.length; i++) {
+                var element = elements[i];
                 element.innerHTML = formatTime(new Date());
             };
         };
