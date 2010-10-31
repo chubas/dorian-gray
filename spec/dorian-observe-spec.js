@@ -32,37 +32,38 @@ describe("Dorian", function() {
             });
 
             it("executes the callback function inmediately after calling the observe method", function() {
+                var counter = 0;
                 var dorian = Dorian.observe({
                     observable : document.getElementsByClassName("time-relative"),
                     interval : 100000,
-                    formatTime : function(relativeTime) { return relativeTime + " ago" }
+                    formatTime : function(relativeTime) { counter++; return relativeTime + " ago" }
                 });
+                expect(counter).toBe(1);
                 expect(tag.innerHTML.match(/ago/)).toBeTruthy();
             });
 
             it("executes the callback on the intervals specified", function() {
-                DeLorean.globalApi(true);
-                var counter = 0;
-                var dorian = Dorian.observe({
-                    observable : document.getElementsByClassName("time-relative"),
-                    interval : 60000,
-                    formatTime : function(relativeTime) { counter++; return relativeTime; }
+                withDeLorean(function() {
+                    var counter = 0;
+                    var dorian = Dorian.observe({
+                        observable : document.getElementsByClassName("time-relative"),
+                        interval : 60000,
+                        formatTime : function(relativeTime) { counter++; return relativeTime; }
+                    });
+                    DeLorean.advance(60000 * 10);
+                    expect(counter).toBe(11); // 10 plus the initial
                 });
-                DeLorean.advance(60000 * 10);
-                expect(counter).toBe(11); // 10 plus the initial
-                DeLorean.reset();
 
-                counter = 0;
-                dorian = Dorian.observe({
-                    observable : document.getElementsByClassName("time-relative"),
-                    interval : 60000,
-                    formatTime : function(relativeTime) { counter++; return relativeTime; }
+                withDeLorean(function() {
+                    counter = 0;
+                    dorian = Dorian.observe({
+                        observable : document.getElementsByClassName("time-relative"),
+                        interval : 60000,
+                        formatTime : function(relativeTime) { counter++; return relativeTime; }
+                    });
+                    DeLorean.advance(60000 * 10 - 1);
+                    expect(counter).toBe(10); // 1 millisecond before the 10th callback
                 });
-                DeLorean.advance(60000 * 10 - 1);
-                expect(counter).toBe(10); // 1 millisecond before the 10th callback
-
-                DeLorean.reset();
-                DeLorean.globalApi(false);
             });
 
             it("accepts a string as the observable argument, and searches the DOM for class name", function() {

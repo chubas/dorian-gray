@@ -17,7 +17,7 @@ function Dorian(options) {
     }
     this._observerTimerID = null;
     this.observe = function() {
-        var replace = function() {
+        var age = function() {
             var elements;
             if(typeof(observable) === 'function') {
                 elements = observable();
@@ -32,8 +32,8 @@ function Dorian(options) {
                 element.innerHTML = formatTime(new Date());
             };
         };
-        replace();
-        setInterval(replace, interval);
+        age();
+        setInterval(age, interval);
     };
 }
 Dorian.observe = function(options) {
