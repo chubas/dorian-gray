@@ -20,9 +20,8 @@ describe("Dorian", function() {
             var tag;
             beforeEach(function(){
                 tag = document.createElement("div");
-                tag.setAttribute("title", "Sat Oct 30 18:35:18 -0500 2010");
                 tag.setAttribute("class", "time-relative");
-                var text = document.createTextNode("Some text");
+                var text = document.createTextNode("Sat Oct 30 18:35:18 -0500 2010");
                 tag.appendChild(text);
                 document.body.appendChild(tag);
             });
@@ -35,8 +34,9 @@ describe("Dorian", function() {
                 var counter = 0;
                 var dorian = Dorian.observe({
                     observable : document.getElementsByClassName("time-relative"),
-                    interval : 100000,
-                    formatTime : function(relativeTime) { counter++; return relativeTime + " ago" }
+                    interval : 60000,
+                    formatTime : function(relativeTime) { counter++; return relativeTime + " ago" },
+                    getTime : function() { return (new Date()).toString(); }
                 });
                 expect(counter).toBe(1);
                 expect(tag.innerHTML.match(/ago/)).toBeTruthy();
@@ -48,7 +48,8 @@ describe("Dorian", function() {
                     var dorian = Dorian.observe({
                         observable : document.getElementsByClassName("time-relative"),
                         interval : 60000,
-                        formatTime : function(relativeTime) { counter++; return relativeTime; }
+                        formatTime : function(relativeTime) { counter++; return relativeTime; },
+                        getTime : function() { return (new Date()).toString(); }
                     });
                     DeLorean.advance(60000 * 10);
                     expect(counter).toBe(11); // 10 plus the initial
@@ -59,7 +60,8 @@ describe("Dorian", function() {
                     dorian = Dorian.observe({
                         observable : document.getElementsByClassName("time-relative"),
                         interval : 60000,
-                        formatTime : function(relativeTime) { counter++; return relativeTime; }
+                        formatTime : function(relativeTime) { counter++; return relativeTime; },
+                        getTime : function() { return (new Date()).toString(); }
                     });
                     DeLorean.advance(60000 * 10 - 1);
                     expect(counter).toBe(10); // 1 millisecond before the 10th callback
@@ -86,6 +88,27 @@ describe("Dorian", function() {
                 });
                 expect(counter).toBe(1);
                 expect(document.getElementsByClassName("time-relative")[0].innerHTML.match(/ago/)).toBeTruthy();
+            });
+
+            it("keeps a reference of the interval function ID", function() {
+                var dorian = Dorian.observe({
+                    observable : document.getElementsByClassName("time-relative"),
+                    interval : 60000
+                });
+                expect(dorian._observerTimerID).not.toBe(null);
+            });
+
+            it("does nothing when already observing", function() {
+                var counter = 0;
+                var dorian = Dorian.observe({
+                    observable : document.getElementsByClassName("time-relative"),
+                    interval : 60000
+                });
+                var originalTimerID = dorian._observerTimerID;
+                spyOn(dorian, 'age');
+                dorian.observe();
+                expect(dorian.age).not.toHaveBeenCalled();
+                expect(dorian._observerTimerID).toBe(originalTimerID);
             });
         });
     });

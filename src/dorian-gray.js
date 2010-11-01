@@ -2,8 +2,8 @@ function Dorian(options) {
     var _options = options || {};
     var observable = _options.observable || [];
     var interval = _options.interval;
-    var getTime = _options.getTime || function(element) { return element.innerHTML; };
-    var formatTime = _options.formatTime || function(relative) { return relative; };
+    var getTime = _options.getTime || function(element) { return element.getAttribute("datatime") || element.getAttribute("title") || element.innerHTML; };
+    var formatTime = _options.formatTime || function(relative) { return relative + " ago"; };
 
     if(typeof(observable) === 'undefined') {
         this._observed = [];
@@ -17,23 +17,33 @@ function Dorian(options) {
     }
     this._observerTimerID = null;
     this.observe = function() {
-        var age = function() {
-            var elements;
-            if(typeof(observable) === 'function') {
-                elements = observable();
-            } else if(typeof(observable) === 'string') {
-                elements = document.getElementsByClassName(observable);
-            } else {
-                elements = observable;
-            }
+        if(this._observerTimerID !== null) {
+            return;
+        }
+        this.age();
+        this._observerTimerID = setInterval(this.age, interval);
+    };
+    this.age = function() {
+        var elements;
+        if(typeof(observable) === 'function') {
+            elements = observable();
+        } else if(typeof(observable) === 'string') {
+            elements = document.getElementsByClassName(observable);
+        } else {
+            elements = observable;
+        }
 
-            for(var i = 0; i < elements.length; i++) {
-                var element = elements[i];
-                element.innerHTML = formatTime(new Date());
-            };
+        var currentTime = (new Date()).getTime();
+        var pastTime, element, differenceInSeconds;
+        for(var i = 0; i < elements.length; i++) {
+            element = elements[i];
+            pastTime = Date.parse(getTime(element));
+            if(!pastTime || isNaN(pastTime)) {
+                throw("Time could not be parsed");
+            }
+            differenceInSeconds = Math.round((currentTime - pastTime) / 1000);
+            element.innerHTML = formatTime(Dorian.distanceOfTimeInWords(differenceInSeconds));
         };
-        age();
-        setInterval(age, interval);
     };
 }
 Dorian.observe = function(options) {
@@ -41,10 +51,9 @@ Dorian.observe = function(options) {
     dorian.observe();
     return dorian;
 };
-Dorian.distanceOfTimeInWords = function(secondsEllapsed, includeSeconds, options) {
+Dorian.distanceOfTimeInWords = function(secondsEllapsed, includeSeconds) {
     var _secondsEllapsed = secondsEllapsed;
     var _includeSeconds = includeSeconds;
-    var _options = options || {};
 
     var distanceInMinutes = Math.round(secondsEllapsed / 60);
     var distanceInSeconds = Math.round(secondsEllapsed);
